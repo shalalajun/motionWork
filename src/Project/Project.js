@@ -6,7 +6,8 @@ import Renderer from './Renderer.js';
 import World from './World/World.js';
 import Resources from './Utils/Resources.js';
 import sources from './sources.js'
-import Boid from './World/Boid.js'
+import Circle from './World/Circle.js';
+
 
 
 
@@ -33,11 +34,30 @@ export default class Project
         this.camera = new Camera();
         this.renderer = new Renderer();
         this.world = new World();
-        this.boid = new Boid();
-        this.gravity = new THREE.Vector3(0, -0.005, 0);
-        this.wind = new THREE.Vector3(0.002,0,0);
+       // this.circle = new Circle();
+        this.circles = [];
+        this.circleGroup = new THREE.Group();
 
+        this.center = new THREE.Vector3(0,0,0);
+        this.radius = 2.0;
+        this.angle = 0;
+        this.resolution = 50;
+       
 
+        for(let i=0; i < this.resolution; i++)
+        {
+            // const px = this.center.x + this.radius * Math.cos(this.angle + i); 
+            // const py = this.center.y + this.radius * Math.sin(this.angle + i);
+            
+            const step = 2 / this.resolution;
+            this.scale = 1 * step;
+            const px = (i+0.5)*step-1;
+            const py = px * px;
+            this.circles[i] = new Circle(px,py);
+            this.circles[i].circle.scale.set(this.scale,this.scale,this.scale);
+           
+        }
+        console.log(this.circles);
         this.sizes.on('resize',()=>
         {
             this.resize();
@@ -59,12 +79,7 @@ export default class Project
     update()
     {
         this.camera.update();
-        this.renderer.update();
-        this.boid.applyForce(this.gravity);
-        //window.addEventListener('mousedown', this.boid.applyForce(this.wind), false);
-        //this.boid.applyForce(this.wind);
-        this.boid.update();
-        this.boid.edges();
-       
+        this.renderer.update(); 
+        
     }
 }
