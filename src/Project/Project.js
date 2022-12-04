@@ -8,6 +8,7 @@ import Resources from './Utils/Resources.js';
 import sources from './sources.js'
 import Circle from './World/Circle.js';
 import GUI from 'lil-gui'; 
+import Stats from 'stats.js';
 
 
 
@@ -44,8 +45,12 @@ export default class Project
         this.angle = 0;
         this.resolution = 30;
         this.points = this.resolution * this.resolution;
+        
+        this.stats = new Stats();
+        this.stats.showPanel(0);
+        document.body.appendChild(this.stats.dom);
+      
 
-       
         this.gui = new GUI();
         this.parameter =
         {
@@ -94,16 +99,18 @@ export default class Project
 
     update()
     {
+        this.stats.begin();
         //this.circleUpdate();
         this.circleSecond();
         this.camera.update();
         this.renderer.update(); 
+        this.stats.end();
         
     }
 
     circleUpdate()
     {
-        this.angle = this.angle + 0.008;
+        this.angle = this.angle + 0.02;
         for(let i=0; i < this.resolution; i++)
         {
             // const px = this.center.x + this.radius * Math.cos(this.angle + i); 
@@ -173,5 +180,10 @@ export default class Project
         let d = Math.sqrt(x * x + z * z);
         let dy = Math.sin(Math.PI * (4 * d - t));
         return dy / (1 + 10 * d);
+    }
+
+    checkFPS()
+    {
+       
     }
 }

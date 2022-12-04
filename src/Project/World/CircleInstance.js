@@ -26,7 +26,7 @@ export default class CircleInstance
 
         this.resolution = 30;
 
-        this.setMesh(this.resolution);
+       
     }
 
     setMesh(resolution)
@@ -34,12 +34,6 @@ export default class CircleInstance
         const matrix = new THREE.Matrix4();
         this.circleGeometry = new THREE.BoxGeometry(1,1,1);
         this.circleMaterial = new THREE.MeshStandardMaterial({color:'white'});
-        // this.circleMaterial = new THREE.ShaderMaterial(
-        //     {
-        //         vertexShader: vertex,
-        //         fragmentShader: fragment
-        //     });
-        //this.circle = new THREE.Mesh(this.circleGeometry, this.circleMaterial);
         this.circle = new THREE.Mesh(this.circleGeometry, this.circleMaterial);
         this.circle.receiveShadow = true;
         this.circle.castShadow = true;
