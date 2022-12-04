@@ -52,17 +52,46 @@ export default class Project
         document.body.appendChild(this.stats.dom);
 
         this.matrix = new THREE.Matrix4();
+        this.dummy = new THREE.Object3D();
 
-        this.circleGeometry = new THREE.BoxGeometry(0.2,0.2,0.2);
+        this.circleGeometry = new THREE.BoxGeometry(1,1,1);
         this.circleMaterial = new THREE.MeshStandardMaterial({color:'white'});
         this.circleInstances = new THREE.InstancedMesh(this.circleGeometry, this.circleMaterial, 100);
         
+
+        this.scale = new THREE.Vector3();
+        this.position = new THREE.Vector3();
+        this.rotation = new THREE.Euler();
+        this.quaternion = new THREE.Quaternion();
+        this.amount = 10;
+
         for(let i=0; i<100; i++)
         {
-            this.matrix.setPosition(i, 0, 0);
-            this.circleInstances.setMatrixAt( i, this.matrix );
+            const step = 2 / this.resolution;
+            //this.scale = 1 * step;
+            
+            this.position.x = Math.random() * 10 - 5;
+            this.position.y = Math.random() * 10 - 5;
+            this.position.z = Math.random() * 10 - 5;
+
+            this.rotation.x = Math.random() * 2 * Math.PI;
+            this.rotation.y = Math.random() * 2 * Math.PI;
+            this.rotation.z = Math.random() * 2 * Math.PI;
+
+            this.quaternion.setFromEuler( this.rotation );
+
+            this.scale.x = this.scale.y = this.scale.z = Math.random() * 1;
+
+            this.matrix.setPosition(this.position.x, this.position.y, this.position.z);
+            this.circleInstances.setMatrixAt(i, this.matrix);
+
+            // this.matrix.compose( this.position, this.quaternion, this.scale );
+            // this.circleInstances.applyMatrix4( this.matrix );
+           
+           
         }
 
+        this.circleInstances.instanceMatrix.setUsage( THREE.DynamicDrawUsage );
         this.scene.add(this.circleInstances);
 
         //console.log(circleInstances)
@@ -118,8 +147,10 @@ export default class Project
         this.stats.begin();
         //this.circleUpdate();
         this.circleSecond();
+       
         this.camera.update();
         this.renderer.update(); 
+        this.updateinstance();
         this.stats.end();
         
     }
@@ -182,6 +213,8 @@ export default class Project
         return Math.sin(Math.PI * (x+z+t));
     }
 
+   
+
     multiWave(x, z, t)
     {
         let y = Math.sin(Math.PI * (x+ 0.5 * t));
@@ -198,8 +231,40 @@ export default class Project
         return dy / (1 + 10 * d);
     }
 
-    checkFPS()
+    updateinstance()
     {
-       
+        
+        this.angle = this.angle + 0.01;
+        this.circleInstances.rotation.y = Math.PI/2;
+	    // this.circleInstances.rotation.y = Math.sin( this.angle / 2 );
+
+        let i = 0;
+        const offset = ( this.amount - 1 ) / 2;
+
+        for(let x=0; x<this.amount; x++)
+        {
+            for(let y=0; y<this.amount; y++)
+            {
+                for(let z=0; z<this.amount; z++)
+                {
+                    this.dummy.position.set( offset - x, offset - y, offset - z );
+                    this.dummy.rotation.y = ( Math.sin( x / 4 + this.angle ) + Math.sin( y / 4 + this.angle ) + Math.sin( z / 4 + this.angle ) );
+                    this.dummy.rotation.z = this.dummy.rotation.y * 2;
+                    this.dummy.scale.set(0.1,0.1,0.1);
+                    this.dummy.updateMatrix();
+                    this.circleInstances.setMatrixAt( i ++ , this.dummy.matrix );
+                
+                }
+            }
+        }
+        // for(let i=0; i<100; i++)
+        // {
+        //     this.dummy.rotation.y = ( Math.sin( i + this.angle));
+        //     this.dummy.updateMatrix();
+        //     this.circleInstances.setMatrixAt( i , this.dummy.matrix );
+    
+        // }
+        this.circleInstances.instanceMatrix.needsUpdate = true;
+
     }
 }
