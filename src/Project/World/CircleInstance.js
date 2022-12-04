@@ -11,9 +11,10 @@ export default class CircleInstance
     {
         this.project = new Project();
         this.scene = this.project.scene;
+        
+        this.mesh;
+        
 
-        this.circle = [];
-        this.circleGroup = new THREE.Group();
         this.center = new THREE.Vector3(0,0,0);
         this.radius = 10.0;
         this.angle = 0;
@@ -26,21 +27,20 @@ export default class CircleInstance
 
         this.resolution = 30;
 
+        this.setMesh();
+
        
     }
 
-    setMesh(resolution)
+    setMesh()
     {
-        const matrix = new THREE.Matrix4();
         this.circleGeometry = new THREE.BoxGeometry(1,1,1);
         this.circleMaterial = new THREE.MeshStandardMaterial({color:'white'});
-        this.circle = new THREE.Mesh(this.circleGeometry, this.circleMaterial);
-        this.circle.receiveShadow = true;
-        this.circle.castShadow = true;
-        
-        this.circle.position.copy(this.position);
-        this.circleGroup.add(this.circle);
-        this.scene.add(this.circleGroup);
+        this.mesh = new THREE.InstancedMesh(this.circleGeometry, this.circleMaterial);
+       // this.circle = new THREE.Mesh(this.circleGeometry, this.circleMaterial);   
+        //this.scene.add(this.mesh);
+        return this.mesh;
+
     }
 
     update()
@@ -50,10 +50,5 @@ export default class CircleInstance
         const py = this.wave(this.position.x, this.angle);
         this.position.set(0,py,0);
         this.circle.position.copy(this.position);
-    }
-
-    wave(x, t)
-    {
-        return Math.Sin(Math.PI * (x+t));
     }
 } 

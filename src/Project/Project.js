@@ -7,6 +7,7 @@ import World from './World/World.js';
 import Resources from './Utils/Resources.js';
 import sources from './sources.js'
 import Circle from './World/Circle.js';
+import CircleInstance from './World/CircleInstance.js';
 import GUI from 'lil-gui'; 
 import Stats from 'stats.js';
 
@@ -49,7 +50,22 @@ export default class Project
         this.stats = new Stats();
         this.stats.showPanel(0);
         document.body.appendChild(this.stats.dom);
-      
+
+        this.matrix = new THREE.Matrix4();
+
+        this.circleGeometry = new THREE.BoxGeometry(0.2,0.2,0.2);
+        this.circleMaterial = new THREE.MeshStandardMaterial({color:'white'});
+        this.circleInstances = new THREE.InstancedMesh(this.circleGeometry, this.circleMaterial, 100);
+        
+        for(let i=0; i<100; i++)
+        {
+            this.matrix.setPosition(i, 0, 0);
+            this.circleInstances.setMatrixAt( i, this.matrix );
+        }
+
+        this.scene.add(this.circleInstances);
+
+        //console.log(circleInstances)
 
         this.gui = new GUI();
         this.parameter =
