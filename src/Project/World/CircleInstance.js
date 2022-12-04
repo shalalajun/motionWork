@@ -5,7 +5,7 @@ import fragment from "../assets/shaders/fragment.glsl";
 
 
 
-export default class Circle
+export default class CircleInstance
 {
     constructor(x,y)
     {
