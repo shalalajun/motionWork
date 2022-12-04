@@ -7,6 +7,7 @@ import World from './World/World.js';
 import Resources from './Utils/Resources.js';
 import sources from './sources.js'
 import Circle from './World/Circle.js';
+import GUI from 'lil-gui'; 
 
 
 
@@ -41,19 +42,34 @@ export default class Project
         this.center = new THREE.Vector3(0,0,0);
         this.radius = 2.0;
         this.angle = 0;
-        this.resolution = 50;
-       
+        this.resolution = 30;
+        this.points = this.resolution * this.resolution;
 
-        for(let i=0; i < this.resolution; i++)
+       
+        this.gui = new GUI();
+        this.parameter =
+        {
+            function: 1
+        };
+
+        this.gui.add(this.parameter,'function',0,2,1);
+
+
+        for(let i=0, x=0, z=0; i < this.resolution * this.resolution; i++, x++)
         {
             // const px = this.center.x + this.radius * Math.cos(this.angle + i); 
             // const py = this.center.y + this.radius * Math.sin(this.angle + i);
-            
+            if(x == this.resolution)
+            {
+                x=0;
+                z += 1;
+            }
             const step = 2 / this.resolution;
             this.scale = 1 * step;
-            const px = (i+0.5)*step-1;
-            const py = px * px;
-            this.circles[i] = new Circle(px,py);
+            const px = (x+0.5)*step-1;
+            const pz = (z+0.5)*step-1;
+            const py = Math.sin(Math.PI * (px+this.angle));
+            this.circles[i] = new Circle(px,py,pz);
             this.circles[i].circle.scale.set(this.scale,this.scale,this.scale);
            
         }
@@ -78,8 +94,84 @@ export default class Project
 
     update()
     {
+        //this.circleUpdate();
+        this.circleSecond();
         this.camera.update();
         this.renderer.update(); 
         
+    }
+
+    circleUpdate()
+    {
+        this.angle = this.angle + 0.008;
+        for(let i=0; i < this.resolution; i++)
+        {
+            // const px = this.center.x + this.radius * Math.cos(this.angle + i); 
+            // const py = this.center.y + this.radius * Math.sin(this.angle + i);
+            
+            const step = 2 / this.resolution;
+            this.scale = 1 * step;
+            const px = (i+0.5)*step-1;
+            const py = Math.sin(Math.PI * (px+this.angle));
+            this.circles[i].circle.position.set(px,py,0);
+           
+        }
+    }
+
+    circleSecond()
+    {
+
+        this.angle = this.angle + 0.01;
+        for(let i=0, x=0, z=0; i < this.resolution * this.resolution; i++, x++)
+        {
+            // const px = this.center.x + this.radius * Math.cos(this.angle + i); 
+            // const py = this.center.y + this.radius * Math.sin(this.angle + i);
+            if(x == this.resolution)
+            {
+                x=0;
+                z += 1;
+            }
+            const step = 2 / this.resolution;
+            this.scale = 1 * step;
+            const px = (x+0.5)*step-1;
+            const pz = (z+0.5)*step-1;
+            let py;
+            if(this.parameter.function == 0)
+            {
+                py = this.wave(this.circles[i].circle.position.x, this.circles[i].circle.position.z, this.angle);   
+                
+            }else if(this.parameter.function == 1)
+            {
+                py = this.multiWave(this.circles[i].circle.position.x, this.circles[i].circle.position.z, this.angle);
+           
+            }else
+            {
+                py = this.ripple(this.circles[i].circle.position.x, this.circles[i].circle.position.z, this.angle);
+            }
+              
+            this.circles[i].circle.position.set(this.circles[i].circle.position.x,py,pz);
+           
+        }
+    }
+
+    wave(x, z, t)
+    {
+        return Math.sin(Math.PI * (x+z+t));
+    }
+
+    multiWave(x, z, t)
+    {
+        let y = Math.sin(Math.PI * (x+ 0.5 * t));
+        y += 0.5 * Math.sin(2 * Math.PI * (z + t));
+        y += Math.sin(Math.PI * (x + z + 0.25 * t));
+        return y * (1/2.5);
+    }
+
+    ripple(x, z, t)
+    {
+        //let d = Math.abs(x);
+        let d = Math.sqrt(x * x + z * z);
+        let dy = Math.sin(Math.PI * (4 * d - t));
+        return dy / (1 + 10 * d);
     }
 }
